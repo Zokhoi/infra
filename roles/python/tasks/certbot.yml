@@ -1,0 +1,65 @@
+---
+- name: Ensure python3 on target
+  become: true
+  package:
+    state: present
+    name:
+      - python3
+      - python3-venv
+      - libaugeas0
+
+- name: Remove OS certbot
+  become: true
+  package:
+    state: absent
+    name:
+      - certbot
+      - python3-certbot-dns-cloudflare
+
+- name: Install certbot and related packages by pip
+  become: true
+  pip:
+    virtualenv: /opt/certbot/
+    virtualenv_command: python3 -m venv
+    state: present
+    name:
+      - certbot
+      - certbot-dns-cloudflare
+
+- name: Create symlink for certbot executable
+  become: true
+  file:
+    src: /opt/certbot/bin/certbot
+    path: /usr/bin/certbot
+    state: link
+
+- name: Register certbot
+  become: true
+  shell: |
+    certbot -n register --agree-tos --no-eff-email --email {{ secret.certbot.email }}
+    touch /etc/letsencrypt/.registered
+  args:
+    creates: /etc/letsencrypt/.registered
+
+- name: Setup cronjob for renewal
+  cron:
+    name: certbot-renewal
+    job: "/bin/bash -lc '/usr/bin/certbot -q renew'"
+    minute: "0"
+    hour: "14"
+
+- name: Setup cloudflare credentials
+  template:
+    src: cloudflare.ini.j2
+    dest: /home/{{ username }}/.secrets/certbot/cloudflare.ini
+    mode: 0600
+
+- name: Get certificate
+  command: >
+    /usr/bin/certbot -n certonly --dns-cloudflare
+    --dns-cloudflare-credentials /home/{{ username }}/.secrets/certbot/cloudflare.ini
+    -d {{ secret.certbot.hostname }}
+    -d *.{{ secret.certbot.hostname }}
+  args:
+    creates: '/etc/letsencrypt/live/{{ secret.certbot.hostname }}'
+  ignore_errors: true

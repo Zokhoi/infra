@@ -1,0 +1,25 @@
+---
+pyenv:
+  pyenv_userhome: /home/{{ username }}/.pyenv
+  pyenv_globalhome: /usr/local/pyenv
+  pyenv_home: /home/{{ username }}/.pyenv
+  dependencies:
+    git
+    make 
+    build-essential
+    libssl-dev
+    zlib1g-dev
+    libbz2-dev
+    libreadline-dev
+    libsqlite3-dev
+    wget
+    curl
+    llvm
+    libncurses5-dev
+    libncursesw5-dev
+    xz-utils
+    tk-dev
+    libffi-dev
+    liblzma-dev
+    libxml2-dev
+    libxmlsec1-dev

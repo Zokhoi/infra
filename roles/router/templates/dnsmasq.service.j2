@@ -1,0 +1,12 @@
+[Unit]
+Description=DHCP and DNS caching server for %i.
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/dnsmasq -k
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

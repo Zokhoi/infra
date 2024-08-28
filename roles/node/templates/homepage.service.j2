@@ -1,0 +1,14 @@
+[Unit]
+Description="Homepage"
+StartLimitIntervalSec=15
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User={{ username }}
+WorkingDirectory={{ homepage.install_path }}
+ExecStart={{ node.nvm_home }}/nvm-exec pnpm start -p {{ homepage.port }}
+
+[Install]
+WantedBy=multi-user.target

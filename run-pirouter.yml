@@ -1,0 +1,32 @@
+---
+- hosts: pirouter
+  gather_facts: true
+  vars:
+    ansible_user: "{{ username }}"
+    deb_architecture: 
+      armv6l: armhf
+      armv7l: armhf
+      aarch64: arm64
+      x86_64: amd64
+      i386: i386
+  roles:
+    - role: system
+      tags:
+        - system
+        - pirouter
+
+    - role: comfast
+      tags:
+        - comfast
+        - pirouter
+
+    - role: router
+      tags:
+        - router
+        - pirouter
+
+    - role: docker
+      tags:
+        - docker
+        - pirouter
+      when: '"docker" in extra_roles'

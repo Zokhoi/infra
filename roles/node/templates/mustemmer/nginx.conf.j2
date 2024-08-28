@@ -1,0 +1,22 @@
+# web server for reverse proxying to Mustemmer
+server {
+  listen {{ mustemmer.exposed_port }};
+  listen [::]:{{ mustemmer.exposed_port }};
+
+  root {{ mustemmer.install_path }}/dist/web;
+  index index.html index.htm;
+
+  location /api {
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_pass http://localhost:{{ mustemmer.backend_port }};
+  }
+  location / {
+    try_files $uri $uri/ @frontend;
+  }
+  location @frontend {
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_pass http://localhost:{{ mustemmer.frontend_port }};
+  }
+}

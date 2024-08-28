@@ -1,0 +1,13 @@
+[Unit]
+Description=Uptime-Kuma - A free and open source uptime monitoring solution
+Documentation=https://github.com/louislam/uptime-kuma
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ uptime_kuma.install_path }}
+ExecStart={{ node.nvm_home }}/versions/node/{{ node_using_version.stdout }}/bin/node server/server.js --port={{ port }}
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

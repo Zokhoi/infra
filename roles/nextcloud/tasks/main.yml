@@ -1,0 +1,51 @@
+---
+- name: Install dependencies
+  package:
+    state: present
+    name: "{{ nextcloud.dependencies }}"
+
+- name: Get latest release
+  get_url:
+    url: https://download.nextcloud.com/server/releases/latest.tar.bz2
+    dest: /home/{{ username }}/nextcloud-latest.tar.bz2
+
+- name: Decompress tarball
+  unarchive:
+    src: /home/{{ username }}/nextcloud-latest.tar.bz2
+    dest: "{{ nextcloud.install_path }}/.."
+    creates: "{{ nextcloud.install_path }}"
+    group: www-data
+    owner: www-data
+
+- name: Create postgres db
+  community.postgresql.postgresql_db:
+    port: "{{ postgres.port }}"
+    login_password: "{{ secret.postgres.password }}"
+    name: "{{ nextcloud.database.name }}"
+    state: present
+    encoding: UTF-8
+    template: template0
+
+- name: Create postgres user
+  community.postgresql.postgresql_user:
+    port: "{{ postgres.port }}"
+    login_password: "{{ secret.postgres.password }}"
+    db: "{{ nextcloud.database.name }}"
+    name: "{{ nextcloud.database.user }}"
+    state: present
+    password: "{{ secret.postgres.nextcloud_password }}"
+    comment: User for NextCloud
+
+- name: Setup nextcloud
+  shell: >
+    sudo -u www-data php occ maintenance:install
+    --database "pgsql"
+    --database-name "{{ nextcloud.database.name }}"
+    --database-user "{{ nextcloud.database.user }}"
+    --database-pass "{{ secret.postgres.nextcloud_password }}"
+    --database-port "{{ postgres.port }}"
+    --data-dir "{{ nextcloud.database.dir }}"
+    --admin-user "{{ secret.nextcloud.admin_user }}"
+    --admin-pass "{{ secret.nextcloud.admin_password }}"
+  args:
+    executable: /bin/bash

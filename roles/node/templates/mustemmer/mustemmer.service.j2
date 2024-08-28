@@ -1,0 +1,15 @@
+[Unit]
+Description="Mustemmer"
+Requires=postgresql.service
+After=postgresql.service
+StartLimitIntervalSec=15
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+WorkingDirectory={{ mustemmer.install_path }}
+ExecStart={{ node.nvm_home }}/versions/node/{{ node_using_version.stdout }}/bin/node ./dist/server/index.js
+
+[Install]
+WantedBy=multi-user.target

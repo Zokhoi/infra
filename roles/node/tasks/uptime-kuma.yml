@@ -1,0 +1,60 @@
+---
+- name: Clone repo
+  git:
+    repo: https://github.com/louislam/uptime-kuma.git
+    dest: "{{ uptime_kuma.install_path }}"
+    version: "{{ uptime_kuma.version }}"
+
+- name: Install dependencies
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    pnpm i
+  args:
+    executable: /bin/bash
+    chdir: "{{ uptime_kuma.install_path }}"
+    creates: "{{ uptime_kuma.install_path }}/node_modules"
+
+- name: Download dist
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    node extra/download-dist.js
+  args:
+    executable: /bin/bash
+    chdir: "{{ uptime_kuma.install_path }}"
+    creates: "{{ uptime_kuma.install_path }}/dist"
+
+- name: Create uptime kuma config
+  template:
+    src: uptime-kuma/config.yaml.j2
+    dest: "{{ uptime_kuma.install_path }}/dist/assets/config.yml"
+    mode: 0777
+
+- name: Create unit file
+  become: true
+  template:
+    src: uptime-kuma/uptimekuma.service.j2
+    dest: /etc/systemd/system/uptimekuma.service
+    mode: 0744
+  notify:
+    - reload systemctl
+
+- name: Start/stop uptime kuma
+  become: true
+  service:
+    name: uptimekuma
+    state: "{{ 'started' if uptime_kuma.enabled else 'stopped' }}"
+    enabled: "{{ uptime_kuma.enabled }}"
+
+- name: Remove uptime kuma revproxy server config in other places
+  become: true
+  file:
+    path: /etc/nginx/sites-{{ "available" if uptime_kuma.enabled else "enabled" }}/uptimekuma.conf
+    state: absent
+
+- name: Copy uptime kuma revproxy server config
+  become: true
+  template:
+    src: uptime-kuma/nginx.conf.j2
+    dest: /etc/nginx/sites-{{ "enabled" if uptime_kuma.enabled else "available" }}/uptimekuma.conf
+    mode: 0744
+  notify: restart nginx

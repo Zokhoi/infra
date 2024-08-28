@@ -1,0 +1,14 @@
+# websocket server for reverse proxying to icalingua-bridge-oicq
+server {
+  listen {{ icapp.exposed_port }};
+  listen [::]:{{ icapp.exposed_port }};
+  
+  location / {
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+    proxy_pass http://localhost:{{ icapp.port }};
+  }
+}

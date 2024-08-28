@@ -1,0 +1,74 @@
+---
+- name: Clone repo
+  git:
+    repo: https://github.com/gethomepage/homepage.git
+    dest: "{{ homepage.install_path }}"
+
+- name: Install dependencies
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    pnpm i
+  args:
+    executable: /bin/bash
+    chdir: "{{ homepage.install_path }}"
+    creates: "{{ homepage.install_path }}/node_modules"
+
+- name: Compile homepage
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    pnpm build
+  args:
+    executable: /bin/bash
+    chdir: "{{ homepage.install_path }}"
+    creates: "{{ homepage.install_path }}/.next"
+
+- name: Copy homepage config files
+  copy:
+    src: files/homepage/{{ item }}
+    dest: "{{ homepage.install_path }}/config"
+    mode: 0744
+  with_items:
+    - bookmarks.yaml
+    - docker.yaml
+    - services.yaml
+    - settings.yaml
+    - widgets.yaml
+
+- name: Save node version to .nvmrc
+  lineinfile:
+    dest: "{{ homepage.install_path }}/.nvmrc"
+    line: "{{ node_using_version.stdout }}"
+    mode: 0644
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    create: true
+
+- name: Create unit file
+  become: true
+  template:
+    src: homepage/homepage.service.j2
+    dest: /etc/systemd/system/homepage.service
+    mode: 0744
+  notify:
+    - reload systemctl
+
+- name: Start/stop homepage
+  become: true
+  service:
+    name: homepage
+    state: "{{ 'started' if homepage.enabled else 'stopped' }}"
+    enabled: "{{ homepage.enabled }}"
+
+- name: Remove homepage revproxy server config in other places
+  become: true
+  file:
+    path: /etc/nginx/sites-{{ "available" if homepage.enabled else "enabled" }}/homepage.conf
+    state: absent
+
+- name: Copy homepage revproxy server config
+  become: true
+  template:
+    src: files/homepage/nginx.conf.j2
+    dest: /etc/nginx/sites-{{ "enabled" if homepage.enabled else "available" }}/homepage.conf
+    mode: 0744
+  notify: restart nginx

@@ -1,0 +1,70 @@
+- name: Copy docker compose definitions
+  copy:
+    src: files/compose/
+    dest: "{{ docker.path }}/"
+    mode: 0744
+
+- name: Add portainer docker
+  community.docker.docker_compose_v2:
+    project_name: homelab
+    definition:
+      services:
+        portainer:
+          container_name: portainer
+          image: portainer/portainer-ce:latest
+          ports:
+            - "{{ portainer.port }}:9443"
+          volumes:
+            - "{{ docker.path }}/portainer-data:/data"
+            - /var/run/docker.sock:/var/run/docker.sock
+          restart: unless-stopped
+    state: present
+  when: "'portainer' in {{ containers }}"
+
+- name: Copy homepage config files
+  copy:
+    src: files/homepage/{{ item }}
+    dest: "{{ homepage.config_path }}/"
+    mode: 0744
+  with_items:
+    - bookmarks.yaml
+    - docker.yaml
+    - services.yaml
+    - settings.yaml
+    - widgets.yaml
+  when: "'homepage' in {{ containers }}"
+
+- name: Remove homepage revproxy server config in other places
+  become: true
+  file:
+    path: /etc/nginx/sites-{{ "available" if homepage.enabled else "enabled" }}/homepage.conf
+    state: absent
+
+- name: Copy homepage revproxy server config
+  become: true
+  template:
+    src: files/homepage/nginx.conf.j2
+    dest: /etc/nginx/sites-{{ "enabled" if homepage.enabled else "available" }}/homepage.conf
+    mode: 0744
+  notify: restart nginx
+  when: "'homepage' in {{ containers }}"
+
+- name: Add homepage docker
+  community.docker.docker_compose_v2:
+    project_name: homelab
+    definition:
+      services:
+        homepage:
+          image: ghcr.io/gethomepage/homepage:latest
+          container_name: homepage
+          ports:
+            - "{{ homepage.port }}:3000"
+          volumes:
+            - "{{ homepage.config_path }}:/app/config"
+            - /var/run/docker.sock:/var/run/docker.sock
+          extra_hosts:
+            - "host.docker.internal:host-gateway"
+          restart: unless-stopped
+          network_mode: bridge
+    state: present
+  when: "'homepage' in {{ containers }}"

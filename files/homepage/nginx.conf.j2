@@ -1,0 +1,21 @@
+# web server for reverse proxying to homepage
+server {
+  listen {{ homepage.exposed_port }};
+  listen [::]:{{ homepage.exposed_port }};
+
+  location / {
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_pass http://localhost:{{ homepage.port }};
+  }
+
+{% if "docker" in extra_roles and "portainer" in containers %}
+  location /portainer/ {
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_pass https://localhost:{{ portainer.port }};
+  }
+{% endif %}
+}

@@ -1,0 +1,50 @@
+---
+- hosts: main
+  gather_facts: true
+  vars:
+    ansible_user: "{{ username }}"
+    deb_architecture: 
+      armv6l: armhf
+      armv7l: armhf
+      aarch64: arm64
+      x86_64: amd64
+      i386: i386
+  roles:
+    - role: system
+      tags:
+        - system
+        - allhosts
+    
+    - role: node
+      tags:
+        - node
+        - allhosts
+
+    - role: python
+      tags:
+        - python
+        - allhosts
+
+    - role: docker
+      tags:
+        - docker
+        - allhosts
+      when: '"docker" in {{ extra_roles }}'
+
+    - role: nextcloud
+      tags:
+        - nextcloud
+        - allhosts
+      when: '"nextcloud" in {{ extra_roles }}'
+
+    - role: gitea
+      tags:
+        - gitea
+        - allhosts
+      when: '"gitea" in {{ extra_roles }}'
+
+    - role: code-server
+      tags:
+        - code-server
+        - allhosts
+      when: '"code-server" in {{ extra_roles }}'

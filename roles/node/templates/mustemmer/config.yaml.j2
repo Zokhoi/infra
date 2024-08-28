@@ -1,0 +1,8 @@
+postgres:
+  host: "localhost"
+  port: {{ postgres.port }}
+  username: "postgres"
+  password: "{{ postgres_password }}"
+  database: "{{ mustemmer.postgres_db }}"
+  synchronize: true
+  logging: false

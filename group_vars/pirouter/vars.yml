@@ -1,0 +1,48 @@
+timezone: Asia/Hong_Kong
+
+locale: en_US.UTF-8
+
+keyboard_layout: us
+
+username: pi
+
+extra_packages:
+  - avahi-daemon
+  - avahi-discover
+  - avahi-dnsconfd
+  - avahi-utils
+  - bridge-utils
+  - build-essential
+  # - code-server
+  - curl
+  - dnsmasq
+  - dnsutils
+  - ffmpeg
+  - git
+  - hostapd
+  - htop
+  - iptables
+  - micro
+  - mosh
+  - net-tools
+  # - nethogs
+  # - nginx
+  - neofetch
+  - powertop
+  # - samba
+  - tmux
+  - wget
+
+extra_roles:
+  # - certbot
+  - docker
+
+containers:
+  - portainer
+  - homepage
+
+postgres:
+  port: 4567
+  version: 15
+  python_lib: python3-psycopg2
+  user: postgres

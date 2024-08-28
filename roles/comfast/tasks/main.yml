@@ -1,0 +1,8 @@
+- name: Create rules file
+  become: true
+  template:
+    src: usb-cf-953ax.rules.j2
+    dest: /etc/udev/rules.d/90-usb-3574:6211-mt7921u.rules
+    mode: 0744
+  args:
+    creates: /etc/udev/rules.d/90-usb-3574:6211-mt7921u.rules

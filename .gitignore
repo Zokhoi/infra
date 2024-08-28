@@ -1,0 +1,16 @@
+ref/
+.venv/
+.vagrant/
+Vagrantfile
+
+secret.yml
+*.secret.yml
+secret.yaml
+*.secret.yaml
+
+hosts.ini
+
+**/homepage/*.yaml
+
+**/files/compose/*.yml
+**/files/compose/*.yaml

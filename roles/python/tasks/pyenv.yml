@@ -1,0 +1,36 @@
+---
+- name: Install dependencies
+  become: true
+  package:
+    state: present
+    name: "{{ pyenv.dependencies }}"
+
+- name: Install pyenv
+  git:
+    repo: https://github.com/pyenv/pyenv.git
+    dest: "{{ pyenv.pyenv_home }}"
+  tags: pyenv
+
+- name: Install pyenv plugins
+  git:
+    repo: https://github.com/pyenv/{{ item }}.git
+    dest: "{{ pyenv.pyenv_home }}/plugins/{{ item }}"
+  tags: pyenv
+  with_items:
+    - pyenv-doctor
+    - pyenv-installer
+    - pyenv-update
+    - pyenv-virtualenv
+
+- name: Source pyenv in ~/.{{ item }}
+  blockinfile: 
+    dest: ~/.{{ item }}
+    block: |
+      export PYENV_ROOT="{{ pyenv.pyenv_home }}"
+      command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+      eval "$(pyenv init --path)"
+    marker: "# {mark} PYENV BLOCK"
+    create: true
+  tags: pyenv
+  with_items:
+    - bashrc

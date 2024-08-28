@@ -1,0 +1,39 @@
+- name: Add Docker GPG apt Key
+  become: true
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
+    state: present
+
+- name: Add Docker Repository
+  become: true
+  apt_repository:
+    repo: deb https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release | lower }} stable
+    state: present
+
+- name: Update apt and install docker-ce
+  become: true
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+
+- name: Install Docker Module for Python
+  package:
+    name: "{{ docker.python_lib }}"
+    state: present
+
+- name: Add user to docker group
+  become: true
+  user:
+    name: "{{ username }}"
+    groups:
+      - docker
+    append: true
+    state: present
+
+- include_tasks: containers.yml

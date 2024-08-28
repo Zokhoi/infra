@@ -1,0 +1,72 @@
+---
+- name: Clone repo
+  git:
+    repo: https://github.com/Zokhoi/Icalingua-plus-plus.git
+    dest: "{{ icapp.install_path }}"
+
+- name: Install ffmpeg
+  become: true
+  package:
+    state: present
+    name: ffmpeg
+
+- name: Install dependencies
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    pnpm i
+  args:
+    executable: /bin/bash
+    chdir: "{{ icapp.install_path }}"
+    creates: "{{ icapp.install_path }}/node_modules"
+
+- name: Compile icapp bridge
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    pnpm compile
+  args:
+    executable: /bin/bash
+    chdir: "{{ icapp.install_path }}/icalingua-bridge-oicq"
+    creates: "{{ icapp.install_path }}/icalingua-bridge-oicq/build"
+
+- name: Create bridge config
+  template:
+    src: icapp/config.yaml.j2
+    dest: "{{ icapp.install_path }}/icalingua-bridge-oicq/build/config.yaml"
+    mode: 0777
+
+- name: Create unit file
+  become: true
+  template:
+    src: icapp/icapp.service.j2
+    dest: /etc/systemd/system/icapp.service
+    mode: 0744
+  notify:
+    - reload systemctl
+
+- name: Start icapp
+  become: true
+  service:
+    name: icapp
+    state: started
+    enabled: true
+  when:
+    icapp.enabled == true
+
+- name: Copy icapp revproxy server config
+  become: true
+  template:
+    src: icapp/nginx.conf.j2
+    dest: /etc/nginx/sites-enabled/icapp.conf
+    mode: 0744
+  notify: restart nginx
+  when:
+    icapp.enabled == true
+
+- name: Copy icapp revproxy server config
+  become: true
+  template:
+    src: icapp/nginx.conf.j2
+    dest: /etc/nginx/sites-available/icapp.conf
+    mode: 0744
+  when:
+    icapp.enabled == false

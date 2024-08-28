@@ -1,0 +1,14 @@
+[Unit]
+Description="Icalingua++"
+After=network.target
+StartLimitIntervalSec=15
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+WorkingDirectory={{ icapp.install_path }}/icalingua-bridge-oicq/build
+ExecStart={{ node.nvm_home }}/versions/node/{{ node_using_version.stdout }}/bin/node index.js
+
+[Install]
+WantedBy=multi-user.target

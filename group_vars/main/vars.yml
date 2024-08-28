@@ -1,0 +1,56 @@
+timezone: Asia/Hong_Kong
+
+locale: en_US.UTF-8
+
+keyboard_layout: us
+
+username: vagrant
+
+extra_packages:
+  - avahi-daemon
+  - avahi-discover
+  - avahi-dnsconfd
+  - avahi-utils
+  - build-essential
+  # - code-server
+  - curl
+  - ffmpeg
+  - git
+  - htop
+  - micro
+  - mosh
+  - net-tools
+  - nethogs
+  - nginx
+  - neofetch
+  - postgresql
+  - powertop
+  - samba
+  - tmux
+  - wget
+
+optional_packages:
+  - latexmk
+  - texlive-latex-extra
+
+extra_roles:
+  # - certbot
+  # - code-server
+  - cloudflared
+  - docker
+  # - icapp
+  # - gitea
+  # - mustemmer
+  # - nextcloud
+  - qbittorrent
+  # - uptime-kuma
+
+containers:
+  - portainer
+  - homepage
+
+postgres:
+  port: 4567
+  version: 15
+  python_lib: python3-psycopg2
+  user: postgres

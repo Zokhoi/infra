@@ -1,0 +1,54 @@
+---
+# Reference https://github.com/geerlingguy/ansible-role-postgresql
+- name: Install package to interact with postgres
+  become: true
+  package:
+    state: present
+    name: "{{ postgres.python_lib }}"
+
+- name: Set postgres port
+  become: true
+  lineinfile:
+    path: /etc/postgresql/{{ postgres.version }}/main/postgresql.conf
+    line: "port = {{ postgres.port }}        # (changes requires restart)"
+    search_string: "port = "
+    state: present
+
+- name: Restart postgres
+  become: true
+  service:
+    name: postgresql
+    state: restarted
+    enabled: true
+
+- name: Ensure PostgreSQL data directory exists.
+  file:
+    path: "{{ postgres_data_dir }}"
+    owner: "{{ postgres.user }}"
+    group: "{{ postgres.user }}"
+    state: directory
+    mode: 0700
+
+- name: Check if PostgreSQL database is initialized.
+  become: true
+  stat:
+    path: "{{ postgres_data_dir }}/PG_VERSION"
+  register: pgdata_dir_version
+
+- name: Ensure PostgreSQL database is initialized.
+  command: "{{ postgres_bin_path }}/initdb -D {{ postgres_data_dir }}"
+  when: not pgdata_dir_version.stat.exists
+  become: true
+  become_user: "{{ postgres.user }}"
+  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Ensure PostgreSQL log directory exists.
+  become: true
+  file:
+    path: "{{ postgres_log_dir }}"
+    owner: "{{ postgres.user }}"
+    group: "{{ postgres.user }}"
+    state: directory
+    mode: 0700

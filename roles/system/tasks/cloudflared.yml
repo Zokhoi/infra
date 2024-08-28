@@ -1,0 +1,22 @@
+---
+- name: Add cloudflared gpg key
+  get_url:
+    url: https://pkg.cloudflare.com/cloudflare-main.gpg
+    dest: /usr/share/keyrings/cloudflare-main.gpg
+    mode: 0755
+
+- name: Add cloudflared apt repo
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared {{ ansible_distribution_release | lower }} main"
+    state: present
+    
+- name: Update apt list
+  become: true
+  apt:
+    update_cache: true
+
+- name: Install cloudflared
+  become: true
+  package:
+    state: present
+    name: cloudflared

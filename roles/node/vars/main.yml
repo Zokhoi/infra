@@ -1,0 +1,34 @@
+---
+node:
+  default_version: 20
+  nvm_home: /home/{{ username }}/.nvm
+  nvm_version: v0.39.7
+
+use_home: null
+
+homepage:
+  enabled: false
+  install_path: /home/{{ username }}/git/homepage
+  port: 3980
+  exposed_port: 8080
+
+icapp:
+  enabled: false
+  install_path: /home/{{ username }}/git/icapp
+  port: 53125
+  exposed_port: 53124
+
+mustemmer:
+  enabled: false
+  install_path: /home/{{ username }}/git/Mustemmer
+  frontend_port: 2345
+  backend_port: 3456
+  exposed_port: 3125
+  postgres_db: mustemmer
+
+uptime_kuma:
+  enabled: false
+  install_path: /home/{{ username }}/git/uptime-kuma
+  port: 3990
+  exposed_port: 3997
+  version: "1.23.13"

@@ -1,0 +1,8 @@
+router:
+  interface: wlan1
+  ip: "10.125.2.1"
+  dhcp_begin: "10.125.2.10"
+  dbcp_end: "10.125.2.200"
+  broadcast: "10.125.2.255"
+  subnet_mask: "255.255.255.0"
+  short_subnet_mask: "/24"

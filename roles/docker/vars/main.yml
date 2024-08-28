@@ -1,0 +1,12 @@
+---
+docker:
+  path: /home/{{ username }}/docker
+  python_lib: python3-docker
+
+homepage:
+  config_path: "{{ docker.path }}/homepage"
+  port: 3980
+  exposed_port: 80
+
+portainer:
+  port: 9443

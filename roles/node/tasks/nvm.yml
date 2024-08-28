@@ -1,0 +1,47 @@
+---
+- name: Install nvm
+  git:
+    repo: https://github.com/nvm-sh/nvm.git
+    dest: "{{ node.nvm_home }}"
+    version: "{{ node.nvm_version }}"
+  tags: nvm
+
+- name: Source nvm in ~/.{{ item }}
+  blockinfile: 
+    dest: ~/.{{ item }}
+    block: |
+      export NVM_DIR={{ node.nvm_home }}
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+      [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    marker: "# {mark} NVM BLOCK"
+    create: true
+  tags: nvm
+  with_items:
+    - bashrc
+
+- name: Install node {{ node.default_version }} and set ver
+  tags: nvm
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    nvm install {{ node.default_version }}
+  args:
+    executable: /bin/bash
+
+- name: Save node version to variable
+  tags: nvm
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    nvm current
+  register: node_using_version
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+- name: Install pnpm
+  tags: nvm
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    npm i -g pnpm
+  args:
+    executable: /bin/bash
+    creates: "{{ node.nvm_home }}/versions/node/{{ node_using_version.stdout }}/bin/pnpm"

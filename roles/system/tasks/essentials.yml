@@ -1,0 +1,48 @@
+---
+- name: Set timezone
+  become: true
+  community.general.timezone:
+    name: "{{ timezone }}"
+    
+- name: Update apt list
+  become: true
+  apt:
+    update_cache: true
+
+- name: Install the tools we need
+  become: true
+  package:
+    state: present
+    name: "{{ extra_packages }}"
+
+- name: Add shell reporting to bash
+  blockinfile:
+    path: ~/.{{ item }}
+    block: |
+      # shell reporting via OSC1337
+      export PS1="$PS1\[\e]1337;CurrentDir="'$(pwd)\a\]'
+    marker: "# {mark} SHELL REPORTING BLOCK"
+    create: true
+  with_items:
+    - bashrc
+
+- name: Check if nginx default http exists
+  stat:
+    path: /etc/nginx/sites-enabled/default
+  register: nginx_default_site
+
+- name: Copy nginx default http to sites-available
+  become: true
+  copy:
+    src: /etc/nginx/sites-enabled/default
+    dest: /etc/nginx/sites-available/default
+    remote_src: true
+  when: nginx_default_site.stat.exists
+
+- name: Remove nginx default http
+  become: true
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  when: nginx_default_site.stat.exists
+  notify: restart nginx

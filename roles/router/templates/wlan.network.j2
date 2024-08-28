@@ -1,0 +1,13 @@
+[Match]
+Name = {{ router.interface }}
+
+[Network]
+# DHCPServer = no
+# MulticastDNS = no
+IPForward = yes
+IPMasquerade = both
+Address = {{ router.ip }}{{ router.short_subnet_mask }}
+Broadcast = {{ router.broadcast }}
+
+# We don't set gateway here to prevent trying to send
+# packets to internet through wlan1

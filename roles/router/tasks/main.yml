@@ -1,0 +1,53 @@
+- name: Create hostpad file
+  become: true
+  template:
+    src: hostapd.conf.j2
+    dest: /etc/hostapd/hostapd.conf
+    mode: 0744
+  args:
+    creates: /etc/hostapd/hostapd.conf
+
+- name: Create dnsmasq file
+  become: true
+  template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+    mode: 0744
+  args:
+    creates: /etc/dnsmasq.conf
+
+- name: Create systemd service for dnsmasq
+  become: true
+  template:
+    src: dnsmasq.service.j2
+    dest: /etc/systemd/system/dnsmasq.service
+    mode: 0744
+  args:
+    creates: /etc/systemd/system/dnsmasq.service
+
+- name: Create systemd-networkd network config
+  become: true
+  template:
+    src: wlan.network.j2
+    dest: /etc/systemd/network/01-{{ router.interface }}.network
+    mode: 0744
+  args:
+    creates: /etc/systemd/network/01-{{ router.interface }}.network
+
+- name: Unmask, enable and start hostapd
+  become: true
+  service:
+    name: hostapd
+    state: restarted
+    enabled: true
+    masked: false
+
+- name: Enable and start services
+  become: true
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: true
+  with_items:
+    - systemd-networkd
+    - dnsmasq

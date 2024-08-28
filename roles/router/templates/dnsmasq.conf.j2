@@ -1,0 +1,27 @@
+# Only listen to external wifi usb wlan interface
+interface={{ router.interface }}
+except-interface=wlan0,eth0
+
+# dnsmasq will open tcp/udp port 53 and udp port 67 to world to help with dynamic interfaces (assigning dynamic IPs).
+# dnsmasq will discard world requests to them, but the paranoid might like to close them and let the kernel handle them.
+bind-interfaces
+
+# Optionally set a domain name
+domain=lan
+
+# Set default gateway
+dhcp-option=3,{{ router.ip }}
+
+# Set DNS servers to announce
+dhcp-option=6,{{ router.ip }}
+
+# Dynamic range of IPs to make available to LAN PC and the lease time. 
+# Ideally set the lease time to 5m only at first to test everything works okay before you set long-lasting records.
+dhcp-range={{ router.dhcp_begin }},{{ router.dhcp_end }},{{ router.subnet_mask }},12h
+
+# Disable DNS server
+port=0
+
+# Log requests
+log-dhcp
+log-queries

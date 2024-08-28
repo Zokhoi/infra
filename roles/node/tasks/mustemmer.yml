@@ -1,0 +1,75 @@
+---
+- name: Clone repo
+  git:
+    repo: https://github.com/Zokhoi/Mustemmer.git
+    dest: "{{ mustemmer.install_path }}"
+
+- name: Install dependencies
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    pnpm i
+  args:
+    executable: /bin/bash
+    chdir: "{{ mustemmer.install_path }}"
+    creates: "{{ mustemmer.install_path }}/node_modules"
+
+- name: Install global dependencies
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    pnpm i -g concurrently
+  args:
+    executable: /bin/bash
+
+- name: Compile mustemmer
+  shell: |
+    source {{ node.nvm_home }}/nvm.sh
+    pnpm build
+  args:
+    executable: /bin/bash
+    chdir: "{{ mustemmer.install_path }}"
+    creates: "{{ mustemmer.install_path }}/dist"
+
+- name: Create mustemmer config
+  template:
+    src: mustemmer/config.yaml.j2
+    dest: "{{ mustemmer.install_path }}/dist/config.yaml"
+    mode: 0777
+
+- name: Create postgres db
+  community.postgresql.postgresql_db:
+    port: "{{ postgres.port }}"
+    login_password: "{{ secret.postgres.password }}"
+    name: "{{ mustemmer.postgres_db }}"
+    state: present
+    encoding: UTF-8
+    template: template0
+
+- name: Create unit file
+  become: true
+  template:
+    src: mustemmer/mustemmer.service.j2
+    dest: /etc/systemd/system/mustemmer.service
+    mode: 0744
+  notify:
+    - reload systemctl
+
+- name: Start/stop mustemmer
+  become: true
+  service:
+    name: mustemmer
+    state: '{{ 'started' if mustemmer.enabled else 'stopped' }}'
+    enabled: "{{ mustemmer.enabled }}"
+
+- name: Remove mustemmer revproxy server config in other places
+  become: true
+  file:
+    path: /etc/nginx/sites-{{ "available" if mustemmer.enabled else "enabled" }}/mustemmer.conf
+    state: absent
+
+- name: Copy mustemmer revproxy server config
+  become: true
+  template:
+    src: mustemmer/nginx.conf.j2
+    dest: /etc/nginx/sites-{{ "enabled" if mustemmer.enabled else "available" }}/mustemmer.conf
+    mode: 0744
+  notify: restart nginx

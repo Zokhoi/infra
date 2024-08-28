@@ -1,0 +1,13 @@
+---
+gitea:
+  use_forgejo: true
+  enabled: true
+  initialize: true
+  version: 1.21.11-1
+  port: 3848
+  exposed_port: 3844
+  data_path: /var/lib/forgejo
+  config_path: /etc/forgejo
+  dependencies: []
+  url: http://{{ ansible_host }}:3848
+  site_name: Zokh

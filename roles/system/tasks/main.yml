@@ -1,0 +1,6 @@
+---
+- include_tasks: essentials.yml
+- include_tasks: postgres.yml
+  when: '"postgresql" in {{ extra_packages }}'
+- include_tasks: cloudflared.yml
+  when: '"cloudflared" in {{ extra_roles }}'

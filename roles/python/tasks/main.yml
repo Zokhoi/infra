@@ -1,0 +1,4 @@
+---
+- include_tasks: pyenv.yml
+- include_tasks: certbot.yml
+  when: '"certbot" in {{ extra_roles }}'

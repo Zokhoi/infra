@@ -1,0 +1,182 @@
+---
+- name: Install dependencies
+  package:
+    state: present
+    name: "{{ gitea.dependencies }}"
+
+- name: Set using gitea or forgejo
+  set_fact:
+    gitea_fork: '{{ "forgejo" if gitea.use_forgejo else "gitea" }}'
+
+- name: Get latest gitea release
+  become: true
+  get_url:
+    url: https://dl.gitea.io/gitea/{{ gitea.version }}/gitea-{{ gitea.version }}-linux-{{ deb_architecture[ansible_architecture] }}
+    dest: /usr/local/bin/gitea
+    mode: 0777
+  when: not gitea.use_forgejo
+
+- name: Get latest forgejo release
+  become: true
+  get_url:
+    url: https://codeberg.org/forgejo/forgejo/releases/download/v{{ gitea.version }}/forgejo-{{ gitea.version }}-linux-{{ deb_architecture[ansible_architecture] }}
+    dest: /usr/local/bin/forgejo
+    mode: 0777
+  when: gitea.use_forgejo
+
+- name: Generate JWT_SECRET and save to variable
+  shell: |
+    {{ gitea_fork }} generate JWT_SECRET
+  register: gitea_JWT_SECRET
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+    mode: 0644
+  when: gitea.initialize
+
+- name: Generate LFS_JWT_SECRET and save to variable
+  shell: |
+    {{ gitea_fork }} generate JWT_SECRET
+  register: gitea_LFS_JWT_SECRET
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+    mode: 0644
+  when: gitea.initialize
+
+- name: Generate INTERNAL_TOKEN and save to variable
+  shell: |
+    {{ gitea_fork }} generate INTERNAL_TOKEN
+  register: gitea_JWT_SECRET
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+    mode: 0644
+  when: gitea.initialize
+
+- name: Create system user for git
+  become: true
+  user:
+    name: git
+    system: true
+    shell: /bin/bash
+    groups: ""
+    home: /home/git
+    comment: Git user for {{ gitea_fork }}
+
+- name: Ensure data directory exists
+  become: true
+  file:
+    path: "{{ gitea.data_path }}"
+    owner: git
+    group: git
+    state: directory
+    mode: 0750
+
+- name: Ensure data subdir exists
+  become: true
+  file:
+    path: "{{ gitea.data_path }}/{{ item }}"
+    owner: git
+    group: git
+    state: directory
+    mode: 0750
+  with_items:
+    - custom
+    - data
+    - log
+
+- name: Ensure config directory exists
+  become: true
+  file:
+    path: "{{ gitea.config_path }}"
+    owner: root
+    group: git
+    state: directory
+    mode: "{{ 0750 when gitea.initialize else 0770 }}"
+
+- name: Create postgres db
+  become: true
+  become_user: "{{ postgres.user }}"
+  community.postgresql.postgresql_db:
+    port: "{{ postgres.port }}"
+    login_user: "{{ postgres.user }}"
+    login_password: "{{ secret.postgres.password }}"
+    name: git
+    state: present
+    encoding: UTF-8
+    template: template0
+    mode: 0644
+  when: gitea.initialize
+
+- name: Create postgres user
+  become: true
+  become_user: "{{ postgres.user }}"
+  community.postgresql.postgresql_user:
+    port: "{{ postgres.port }}"
+    login_user: "{{ postgres.user }}"
+    login_password: "{{ secret.postgres.password }}"
+    db: git
+    name: git
+    state: present
+    password: "{{ secret.postgres.gitea_password }}"
+    comment: User for Gitea
+    mode: 0644
+  when: gitea.initialize
+
+- name: Copy {{ gitea_fork }} config file
+  become: true
+  template:
+    src: gitea.app.ini.j2
+    dest: "{{ gitea.config_path }}/app.ini"
+    mode: 0644
+  when: gitea.initialize
+
+# - name: Create gitea admin user
+#   shell: >
+#     {{ gitea_fork }} admin user create
+#     --username ""
+#     --password ""
+#     --email ""
+#     --admin
+#   args:
+#     executable: /bin/bash
+
+- name: Copy {{ gitea_fork }} custom homepage
+  become: true
+  copy:
+    src: templates/home.tmpl
+    dest: "{{ gitea.data_path }}/custom/templates/home.tmpl"
+    mode: 0644
+    owner: git
+    group: git
+
+- name: Create unit file
+  become: true
+  template:
+    src: gitea.service.j2
+    dest: /etc/systemd/system/{{ gitea_fork }}.service
+    mode: 0744
+  notify:
+    - reload systemctl
+
+- name: Start/stop {{ gitea_fork }}
+  become: true
+  service:
+    name: "{{ gitea_fork }}"
+    state: "{{ 'started' if gitea.enabled else 'stopped' }}"
+    enabled: "{{ gitea.enabled }}"
+
+- name: Remove {{ gitea_fork }} revproxy server config in other places
+  become: true
+  file:
+    path: /etc/nginx/sites-{{ "available" if gitea.enabled else "enabled" }}/{{ gitea_fork }}.conf
+    state: absent
+
+- name: Copy {{ gitea_fork }} revproxy server config
+  become: true
+  template:
+    src: gitea.nginx.conf.j2
+    dest: /etc/nginx/sites-{{ "enabled" if gitea.enabled else "available" }}/{{ gitea_fork }}.conf
+    mode: 0744
+  notify: restart nginx
