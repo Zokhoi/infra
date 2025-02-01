@@ -1,0 +1,21 @@
+---
+- name: Check if nginx default http exists
+  stat:
+    path: /etc/nginx/sites-enabled/default
+  register: nginx_default_site
+
+- name: Copy nginx default http to sites-available
+  become: true
+  copy:
+    src: /etc/nginx/sites-enabled/default
+    dest: /etc/nginx/sites-available/default
+    remote_src: true
+  when: nginx_default_site.stat.exists
+
+- name: Remove nginx default http
+  become: true
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  when: nginx_default_site.stat.exists
+  notify: restart nginx
