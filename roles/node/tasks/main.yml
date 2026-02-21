@@ -3,8 +3,8 @@
 - include_tasks: homepage.yml
   when: use_home == "homepage"
 - include_tasks: icapp.yml
-  when: '"icapp" in {{ extra_roles }}'
+  when: '"icapp" in extra_roles'
 - include_tasks: mustemmer.yml
-  when: '"mustemmer" in {{ extra_roles }}'
+  when: '"mustemmer" in extra_roles'
 - include_tasks: uptime-kuma.yml
-  when: '"uptime-kuma" in {{ extra_roles }}'
+  when: '"uptime-kuma" in extra_roles'

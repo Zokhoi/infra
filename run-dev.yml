@@ -35,10 +35,10 @@
       tags:
         - gitea
         - dev
-      when: '"gitea" in {{ extra_roles }}'
+      when: '"gitea" in extra_roles'
 
     - role: code-server
       tags:
         - code-server
         - dev
-      when: '"code-server" in {{ extra_roles }}'
+      when: '"code-server" in extra_roles'

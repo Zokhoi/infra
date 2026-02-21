@@ -19,7 +19,7 @@
             - /var/run/docker.sock:/var/run/docker.sock
           restart: unless-stopped
     state: present
-  when: "'portainer' in {{ containers }}"
+  when: "'portainer' in containers"
 
 - name: Copy homepage config files
   copy:
@@ -32,7 +32,7 @@
     - services.yaml
     - settings.yaml
     - widgets.yaml
-  when: "'homepage' in {{ containers }}"
+  when: "'homepage' in containers"
 
 - name: Remove homepage revproxy server config in other places
   become: true
@@ -47,7 +47,7 @@
     dest: /etc/nginx/sites-{{ "enabled" if homepage.enabled else "available" }}/homepage.conf
     mode: 0744
   notify: restart nginx
-  when: "'homepage' in {{ containers }}"
+  when: "'homepage' in containers"
 
 - name: Add homepage docker
   community.docker.docker_compose_v2:
@@ -67,4 +67,4 @@
           restart: unless-stopped
           network_mode: bridge
     state: present
-  when: "'homepage' in {{ containers }}"
+  when: "'homepage' in containers"

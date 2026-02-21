@@ -29,22 +29,22 @@
       tags:
         - docker
         - allhosts
-      when: '"docker" in {{ extra_roles }}'
+      when: '"docker" in extra_roles'
 
     - role: nextcloud
       tags:
         - nextcloud
         - allhosts
-      when: '"nextcloud" in {{ extra_roles }}'
+      when: '"nextcloud" in extra_roles'
 
     - role: gitea
       tags:
         - gitea
         - allhosts
-      when: '"gitea" in {{ extra_roles }}'
+      when: '"gitea" in extra_roles'
 
     - role: code-server
       tags:
         - code-server
         - allhosts
-      when: '"code-server" in {{ extra_roles }}'
+      when: '"code-server" in extra_roles'

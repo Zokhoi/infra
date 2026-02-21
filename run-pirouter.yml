@@ -29,4 +29,4 @@
       tags:
         - docker
         - pirouter
-      when: '"docker" in {{ extra_roles }}'
+      when: '"docker" in extra_roles'

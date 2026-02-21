@@ -1,8 +1,8 @@
 ---
 - include_tasks: essentials.yml
 - include_tasks: nginx.yml
-  when: '"nginx" in {{ extra_packages }}'
+  when: '"nginx" in extra_packages'
 - include_tasks: postgres.yml
-  when: '"postgresql" in {{ extra_packages }}'
+  when: '"postgresql" in extra_packages'
 - include_tasks: cloudflared.yml
-  when: '"cloudflared" in {{ extra_roles }}'
+  when: '"cloudflared" in extra_roles'
