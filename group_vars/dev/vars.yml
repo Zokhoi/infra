@@ -29,6 +29,8 @@ extra_packages:
   - tmux
   - wget
 
+install_optional: false
+
 optional_packages:
   - latexmk
   - texlive-latex-extra

@@ -15,6 +15,13 @@
     state: present
     name: "{{ extra_packages }}"
 
+- name: Install optional packages
+  become: true
+  package:
+    state: present
+    name: "{{ optional_packages }}"
+  when: install_optional
+
 - name: Add shell reporting to bash
   blockinfile:
     path: ~/.{{ item }}

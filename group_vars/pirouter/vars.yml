@@ -33,6 +33,8 @@ extra_packages:
   - tmux
   - wget
 
+install_optional: false
+
 extra_roles:
   # - certbot
   - docker
