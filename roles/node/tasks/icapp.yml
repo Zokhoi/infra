@@ -49,8 +49,7 @@
     name: icapp
     state: started
     enabled: true
-  when:
-    icapp.enabled == true
+  when: icapp.enabled == true
 
 - name: Copy icapp revproxy server config
   become: true
@@ -59,8 +58,7 @@
     dest: /etc/nginx/sites-enabled/icapp.conf
     mode: 0744
   notify: restart nginx
-  when:
-    icapp.enabled == true
+  when: icapp.enabled == true
 
 - name: Copy icapp revproxy server config
   become: true
@@ -68,5 +66,4 @@
     src: icapp/nginx.conf.j2
     dest: /etc/nginx/sites-available/icapp.conf
     mode: 0744
-  when:
-    icapp.enabled == false
+  when: icapp.enabled == false
