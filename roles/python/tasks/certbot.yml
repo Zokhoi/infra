@@ -44,9 +44,10 @@
 - name: Setup cronjob for renewal
   cron:
     name: certbot-renewal
-    job: "/bin/bash -lc '/usr/bin/certbot -q renew'"
+    user: root
+    job: "/opt/certbot/bin/python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo certbot renew -q --deploy-hook 'nginx -s reload'"
     minute: "0"
-    hour: "14"
+    hour: "0,12"
 
 - name: Setup cloudflare credentials
   template:
