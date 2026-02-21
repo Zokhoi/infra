@@ -1,0 +1,77 @@
+# timezone: Asia/Hong_Kong
+
+locale: en_HK.UTF-8
+
+keyboard_layout: us
+
+username: user
+
+extra_packages:
+  - avahi
+  - avahi-tools
+  # - build-essential
+  # - code-server
+  - cups
+  - cups-filters
+  - curl
+  - ffmpeg
+  - git
+  - htop
+  - micro
+  - mosh
+  # - net-tools
+  # - nethogs
+  # - nginx
+  # - neofetch
+  # - postgresql
+  # - powertop
+  - samba
+  - tmux
+  - wget
+
+install_optional: true
+
+optional_packages:
+  - alacritty
+  - buho
+  - calindori
+  - elisa
+  - firefox-esr
+  - mobile-config-firefox
+  # - flare
+  - gimp
+  - gnome-maps
+  - kasts
+  - keysmith
+  # - librewolf
+  # - mobile-config-firefox-librewolf
+  - lpa-gtk
+  - megapixels
+  - newsflash
+  - okular-mobile
+  - simple-scan
+  # - thunderbird
+  # - mobile-config-thunderbird
+  - waydroid
+
+extra_roles: []
+  # - certbot
+  # - code-server
+  # - cloudflared
+  # - docker
+  # - icapp
+  # - gitea
+  # - mustemmer
+  # - nextcloud
+  # - qbittorrent
+  # - uptime-kuma
+
+containers: []
+  # - portainer
+  # - homepage
+
+postgres:
+  port: 4567
+  version: 15
+  python_lib: python3-psycopg2
+  user: postgres

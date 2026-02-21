@@ -1,0 +1,34 @@
+---
+- hosts: pmos
+  gather_facts: true
+  vars:
+    ansible_user: "{{ username }}"
+    deb_architecture: 
+      armv6l: armhf
+      armv7l: armhf
+      aarch64: arm64
+      x86_64: amd64
+      i386: i386
+  roles:
+    - role: system
+      tags:
+        - system
+        - allhosts
+    
+    - role: node
+      tags:
+        - node
+        - allhosts
+      when: '"node" in extra_roles'
+
+    - role: python
+      tags:
+        - python
+        - allhosts
+      when: '"python" in extra_roles'
+
+    - role: docker
+      tags:
+        - docker
+        - allhosts
+      when: '"docker" in extra_roles'

@@ -1,13 +1,15 @@
 # Infra
 
-This ansible playbook is used to set up and configure my local servers for self hosted services.
+This ansible playbook is used to set up and configure my local servers for self hosted services, and machines for daily usage.
 
-A few of the tasks directly calls for `apt`, therefore this playbook repo only applies to Debian based distros.
+A few of the tasks directly calls for `apt`, therefore this playbook repo mostly only applies to Debian based distros.
+Other distros may gain support when I decide to adapt them.
 
 Host mappings:
 * main -> main homelab server
 * pirouter -> a mobile router on Raspberry Pi 4
 * dev -> a dev server which can be wiped at any moment, a Radxa Rock 3C
+* phone -> a linux phone running postmarketOS, OnePlus 6T
 
 Runtimes include:
 * NodeJS
@@ -33,4 +35,10 @@ Applications include:
 * [Gitea](https://github.com/go-gitea/gitea) or [Forgejo](https://codeberg.org/forgejo/forgejo)
 * [Uptime Kuma](https://github.com/louislam/uptime-kuma)
 * [Grafana](https://github.com/grafana/grafana)
+
+## Deployment
+Activate the python venv, then run
+```sh
+ansible-playbook --ask-pass --ask-become-pass --ask-vault-pass run-<system>.yml
+```
 
