@@ -30,6 +30,10 @@
     name: "{{ optional_packages }}"
   when: install_optional
 
+- name: Install zsh
+  include_tasks: zsh.yml
+  when: '"zsh" in extra_roles'
+
 - name: Add shell reporting to bash
   blockinfile:
     path: ~/.{{ item }}

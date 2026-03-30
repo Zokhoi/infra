@@ -1,0 +1,24 @@
+---
+- name: Install packages
+  become: true
+  package:
+    name: zsh
+    state: present
+  tags: zsh
+
+- name: Install Oh My Zsh
+  shell: |
+    sh -c "$(curl -fsSL https://install.ohmyz.sh/)" "" --unattended --keep-zshrc
+  args:
+    executable: /bin/sh
+    creates: /home/{{ username }}/.oh-my-zsh
+  when: zsh.use_oh_my_zsh == true
+  tags: zsh
+
+- name: Change shell
+  shell: |
+    chsh -s /bin/zsh
+  args:
+    executable: /bin/sh
+  when: zsh.change_shell == true
+  tags: zsh

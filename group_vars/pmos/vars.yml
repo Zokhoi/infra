@@ -72,6 +72,7 @@ extra_roles: []
   # - python
   # - qbittorrent
   # - uptime-kuma
+  # - zsh
 
 containers: []
   # - portainer
@@ -82,3 +83,7 @@ postgres:
   version: 15
   python_lib: python3-psycopg2
   user: postgres
+
+zsh:
+  use_oh_my_zsh: true
+  change_shell: false
