@@ -32,6 +32,7 @@ extra_packages:
 install_optional: true
 
 optional_packages:
+  # - aisleriot
   - alacritty
   - buho
   - calindori
@@ -40,7 +41,9 @@ optional_packages:
   - mobile-config-firefox
   # - flare
   - gimp
+  - gedit
   - gnome-maps
+  # - gnome-mines
   - kasts
   - keysmith
   # - librewolf
@@ -49,9 +52,11 @@ optional_packages:
   - megapixels
   - newsflash
   - okular-mobile
+  - powersupply
   - simple-scan
   # - thunderbird
   # - mobile-config-thunderbird
+  # - tokodon
   - waydroid
 
 extra_roles: []
@@ -63,6 +68,8 @@ extra_roles: []
   # - gitea
   # - mustemmer
   # - nextcloud
+  # - node
+  # - python
   # - qbittorrent
   # - uptime-kuma
 

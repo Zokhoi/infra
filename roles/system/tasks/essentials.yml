@@ -11,6 +11,12 @@
     update_cache: true
   when: ansible_facts["os_family"] == "Debian"
 
+- name: Update apk list
+  become: true
+  community.general.apk:
+    update_cache: true
+  when: ansible_facts["os_family"] == "Alpine"
+
 - name: Install the tools we need
   become: true
   package:
