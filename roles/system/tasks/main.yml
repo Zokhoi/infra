@@ -1,5 +1,7 @@
 ---
 - include_tasks: essentials.yml
+- include_tasks: mdns.yml
+  when: ansible_facts["os_family"] == "Alpine"
 - include_tasks: nginx.yml
   when: '"nginx" in extra_packages'
 - include_tasks: postgres.yml

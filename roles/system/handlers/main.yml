@@ -1,0 +1,7 @@
+---
+- name: Restart NetworkManager
+  become: true
+  service:
+    name: NetworkManager
+    state: restarted
+    enabled: true

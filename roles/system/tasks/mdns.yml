@@ -1,0 +1,66 @@
+---
+# This file should only be called on an Alpine target with systemd
+
+- name: Set Alpine testing repository
+  become: true
+  lineinfile:
+    path: /etc/apk/repositories
+    search_string: testing
+    line: "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing"
+    insertafter: EOF
+    state: present
+
+- name: Update apk list
+  become: true
+  community.general.apk:
+    update_cache: true
+
+- name: Install packages
+  become: true
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - avahi2dns@testing
+    # - dnsmasq
+    - drill
+    - networkmanager-dnsmasq
+  notify:
+    - Restart NetworkManager
+
+- name: Start avahi-daemon
+  become: true
+  service:
+    name: avahi-daemon
+    state: started
+    enabled: true
+
+- name: Start avahi2dns
+  become: true
+  service:
+    name: avahi2dns
+    state: started
+    enabled: true
+
+# - name: Set NetworkManager config
+#   become: true
+#   lineinfile:
+#     path: /etc/NetworkManager/NetworkManager.conf
+#     search_string: dns=
+#     line: "dns=dnsmasq"
+#     insertafter: "dhcp="
+#     state: present
+#   when: ansible_facts["os_family"] == "Alpine"
+#   notify:
+#     - Restart NetworkManager
+
+- name: Set dnsmasq config
+  become: true
+  blockinfile: 
+    dest: /etc/NetworkManager/dnsmasq.d/mdns.conf
+    block: |
+      # Forward queries for the "local" domain to 127.0.0.1 port 5354
+      server=/local/127.0.0.1#5354
+    marker: "# {mark} DNSMASQ BLOCK"
+    create: true
+  when: ansible_facts["os_family"] == "Alpine"
