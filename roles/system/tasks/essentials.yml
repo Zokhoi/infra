@@ -34,6 +34,10 @@
   include_tasks: zsh.yml
   when: '"zsh" in extra_roles'
 
+- name: Add dotfiles
+  include_tasks: dotfiles.yml
+  when: '"dotfiles" in extra_roles'
+
 - name: Add shell reporting to bash
   blockinfile:
     path: ~/.{{ item }}

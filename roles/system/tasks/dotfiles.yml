@@ -1,0 +1,47 @@
+---
+- name: Temporarily set git cache config
+  git_config:
+    name: credential.helper
+    value: cache
+    scope: global
+    state: present
+  tags: dotfiles
+
+- name: Clone dotfiles
+  shell: |
+    echo "protocol={{ secret.dotfiles.git_protocol }}
+    host={{ secret.dotfiles.git_host }}
+    username={{ secret.dotfiles.git_user }}
+    password={{ secret.dotfiles.git_password }}" | git credential-cache store &&
+    git clone --bare {{ secret.dotfiles.git_repo }} /home/{{ username }}/.dotfiles
+  args:
+    executable: /bin/sh
+    creates: /home/{{ username }}/.dotfiles
+  tags: dotfiles
+
+- name: Remove git cache config
+  git_config:
+    name: credential.helper
+    value: cache
+    scope: global
+    state: absent
+  tags: dotfiles
+
+- name: Install dotfiles
+  shell: |
+    git --git-dir="/home/{{ username }}/.dotfiles/" --work-tree="/home/{{ username }}" checkout master
+  args:
+    executable: /bin/sh
+  tags: dotfiles
+
+- name: Source dotfiles in shell configs
+  lineinfile:
+    path: ~/.{{ item }}
+    search_string: alias dotfiles
+    line: alias dotfiles='git --git-dir="$HOME/.dotfiles/" --work-tree="$HOME"'
+    insertafter: EOF
+    state: present
+  tags: dotfiles
+  with_items:
+    - bashrc
+    - zshrc

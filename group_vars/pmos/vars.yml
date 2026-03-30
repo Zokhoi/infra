@@ -64,6 +64,7 @@ extra_roles: []
   # - code-server
   # - cloudflared
   # - docker
+  # - dotfiles
   # - icapp
   # - gitea
   # - mustemmer
