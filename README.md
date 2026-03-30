@@ -2,7 +2,7 @@
 
 This ansible playbook is used to set up and configure my local servers for self hosted services, and machines for daily usage.
 
-A few of the tasks directly calls for `apt`, therefore this playbook repo mostly only applies to Debian based distros.
+A few of the tasks directly calls for `apt` or `apk`, therefore this playbook repo mostly only applies to Debian or Alpine based distros.
 Other distros may gain support when I decide to adapt them.
 
 Host mappings:
@@ -40,5 +40,9 @@ Applications include:
 Activate the python venv, then run
 ```sh
 ansible-playbook --ask-pass --ask-become-pass --ask-vault-pass run-<system>.yml
+```
+or shortened version
+```sh
+ansible-playbook -kKJ run-<system>.yml
 ```
 
