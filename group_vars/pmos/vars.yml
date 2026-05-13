@@ -10,21 +10,26 @@ extra_packages:
   - avahi
   - avahi-tools
   # - build-essential
+  - cifs-utils
   # - code-server
   - cups
   - cups-filters
   - curl
+  - fastfetch
   - ffmpeg
   - git
   - htop
   - micro
   - mosh
+  - nano
   # - net-tools
   # - nethogs
   # - nginx
   # - neofetch
   # - postgresql
   # - powertop
+  - sane
+  - sane-airscan
   - samba
   - tmux
   - wget
